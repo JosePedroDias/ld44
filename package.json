@@ -1,0 +1,33 @@
+{
+  "name": "ld44",
+  "version": "1.0.0",
+  "description": "A Ludum Dare Compo entry, hopefully...",
+  "main": "index.js",
+  "dependencies": {
+    "@types/matter-js": "^0.10.2",
+    "@types/pixi.js": "^4.8.7",
+    "cross-env": "^5.2.0",
+    "howler": "^2.1.2",
+    "matter-js": "^0.14.2",
+    "pixi.js": "^4.8.7",
+    "poly-decomp": "^0.3.0",
+    "tslint": "^5.16.0"
+  },
+  "devDependencies": {
+    "ts-loader": "^5.4.4",
+    "typescript": "^3.4.5",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.1",
+    "webpack-dev-server": "^3.3.1"
+  },
+  "scripts": {
+    "start": "webpack-dev-server --content-base=dist",
+    "build": "cross-env NODE_ENV=production webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:JosePedroDias/ld44.git"
+  },
+  "author": "José Pedro Dias <jose.pedro.dias@gmail.com>",
+  "license": "ISC"
+}
