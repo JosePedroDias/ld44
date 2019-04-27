@@ -154,3 +154,20 @@ export function avg(arr: Array<number>) {
   }
   return n / len;
 }
+
+export function accum(
+  arr: Array<number>,
+  newReading: number,
+  maxLength: number
+) {
+  arr.unshift(newReading);
+  if (arr.length > maxLength) {
+    arr.pop();
+  }
+  let v = 0;
+  arr.forEach(vi => {
+    v += vi;
+  });
+
+  return v / maxLength;
+}
