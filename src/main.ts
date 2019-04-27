@@ -1,4 +1,14 @@
-import { Engine, World, Bodies, Events, Body, Vector, IPair } from 'matter-js';
+import {
+  Engine,
+  World,
+  Bodies,
+  Events,
+  Body,
+  Vector,
+  IPair,
+  Query,
+  Composite
+} from 'matter-js';
 import {
   setup,
   renderFactory,
@@ -21,7 +31,7 @@ import {
   justChanged,
   KC_SPACE
 } from './keyboard';
-import { clamp, sign, lerp, randomFromArray } from './utils';
+import { clamp, sign, lerp, randomFromArray, raycast, dist } from './utils';
 import { CAR_CATEGORY, OBSTACLE_CATEGORY } from './matterCategories';
 
 export interface BodyExt extends Body {
@@ -44,6 +54,8 @@ engine.world.gravity.y = 0;
 
 let playerBody: Body;
 let b2: BodyExt;
+
+const obstacles: Array<Body> = [];
 
 // CAR
 
@@ -88,6 +100,7 @@ b2.color = 0xff0000;
 b2.dims = [40, 40];
 b2.scale = 1;
 World.add(engine.world, b2);
+obstacles.push(b2);
 
 renderFactory(engine);
 
@@ -103,6 +116,20 @@ setPosition(new Point(-400, -200));
   });
   toKill = [];
 }); */
+
+Events.on(engine, 'afterUpdate', (ev: any) => {
+  //const bodies = Composite.allBodies(engine.world);
+  //const d = rayDist(playerBody, bodies, -Math.PI / 2, 30, 120);
+  //console.log(d);
+
+  const d = raycast(playerBody, obstacles, -Math.PI / 2, 0, 256, 4);
+
+  //const dd = dist(d[0], d[1]);
+  //console.log(dd.toFixed(0));
+
+  // @ts-ignore
+  window.addLine = [d[0], d[1], 0xff00ff, 2];
+});
 
 /* Events.on(engine, 'collisionStart', (ev: any) => {
   // collisionStart collisionEnd beforeUpdate beforeTick
@@ -163,12 +190,11 @@ Events.on(engine, 'beforeUpdate', (ev: any) => {
     justChanged[k] = false;
   });
 
-  const oldPos = getPosition();
   // console.log(`${oldPos.x.toFixed(0)}, ${oldPos.y.toFixed(0)}`);
 
   // @ts-ignore
   setPosition(cameraTargetBody.position);
-  setZoom(lerp(clamp(0.5 / cameraTargetBody.speed, 1, 2.5), getZoom(), 0.03));
+  // setZoom( lerp(clamp(0.5 / cameraTargetBody.speed, 0.75, 1.33), getZoom(), 0.03) );
 
   //console.log(isDown);
 

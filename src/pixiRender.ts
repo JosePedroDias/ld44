@@ -6,9 +6,10 @@ import {
   Texture,
   DisplayObject,
   Container,
-  Point
+  Point,
+  Rectangle
 } from 'pixi.js';
-import { Composite, Engine, Body } from 'matter-js';
+import { Composite, Engine, Body, Vector } from 'matter-js';
 import { BodyExt } from './main';
 import { D2R, R2D } from './consts';
 
@@ -86,6 +87,50 @@ function sprite(body: BodyExt, app: Application) {
   sp.anchor.set(0.5);
   // @ts-ignore
   body.sprite = sp;
+  return sp;
+}
+
+// @ts-ignore
+let _g, _tex, _sp;
+function line(p0: Vector, p1: Vector, color: number, width: number) {
+  // @ts-ignore
+  if (_g) {
+    // @ts-ignore
+    scene.removeChild(_sp);
+    // @ts-ignore
+    _sp.destroy();
+    // @ts-ignore
+    _tex.destroy();
+    // @ts-ignore
+    _g.destroy();
+  }
+
+  const g: Graphics = new Graphics();
+
+  //g.position.set(400, 300);
+  g.lineStyle(width, color)
+    .moveTo(p0.x, p0.y)
+    .lineTo(p1.x, p1.y);
+
+  const w = Math.max(Math.abs(p0.x - p1.x), 512);
+  const h = Math.max(Math.abs(p0.y - p1.y), 512);
+  const x = Math.min(p0.x, p1.x);
+  const y = Math.min(p0.y, p1.y);
+
+  const tex: Texture = app.renderer.generateTexture(
+    g,
+    1,
+    1,
+    new PIXI.Rectangle(x, y, w, h)
+  );
+  const sp = new Sprite(tex);
+  sp.position.x = x;
+  sp.position.y = y;
+
+  _g = g;
+  _tex = tex;
+  _sp = sp;
+
   return sp;
 }
 
@@ -189,6 +234,15 @@ export function renderFactory(engine: Engine) {
         g.rotation = body.angle;
       });
     }
+
+    //@ts-ignore
+    if (window.addLine) {
+      // @ts-ignore
+      scene.addChild(line.apply(null, window.addLine));
+    }
+    //if (t === 0) {
+    //  scene.addChild(line({ x: 400, y: 300 }, { x: 350, y: 300 }, 0xff00ff, 4));
+    //}
 
     //setRotation(getRotation() + 15 * dt);
     //setZoom((1 + Math.sin(t * 2) * 0.5) * 0.75);

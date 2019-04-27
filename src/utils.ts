@@ -31,10 +31,9 @@ export function normalize(v: Vector, scale: number = 1) {
 }
 
 export function polarMove(pos: Vector, r: number, angle: number): Vector {
-  const a = D2R * angle;
   return {
-    x: pos.x + Math.cos(a) * r,
-    y: pos.y + Math.sin(a) * r
+    x: pos.x + Math.cos(angle) * r,
+    y: pos.y + Math.sin(angle) * r
   };
 }
 
@@ -81,9 +80,37 @@ export function normalizeAngle(a: number) {
   return a;
 }
 
+export function raycast(
+  body: Body,
+  bodies: Array<Body>,
+  dAngle: number,
+  r0: number,
+  r1: number,
+  dR: number
+): Array<Vector> {
+  let p0, p1;
+
+  let r = r0;
+
+  const ang = body.angle + dAngle;
+
+  p0 = polarMove(body.position, r, ang);
+  p1 = p0;
+
+  while (r < r1) {
+    p1 = polarMove(body.position, r, ang);
+    if (Query.point(bodies, p1)[0]) {
+      return [p0, p1];
+    }
+    r += dR;
+  }
+  return [p0, p1];
+}
+
+/*
 export function rayDist(
   body: Body,
-  walls: Array<Body>,
+  bodies: Array<Body>,
   dAngle: number,
   dMin: number,
   dMax: number
@@ -97,18 +124,15 @@ export function rayDist(
     x: p0.x + dMax * Math.cos(body.angle + dAngle),
     y: p0.y + dMax * Math.sin(body.angle + dAngle)
   };
-  const o = Query.ray(walls, v0, v1, dMax); // engine.world.bodies
+  const o = Query.ray(bodies, v0, v1, dMax); // engine.world.bodies
   let d = 10000;
   if (o.length > 0) {
-    let b1 = o[0].body as Body;
-    if (b1 === body) {
-      b1 = o[1].body as Body;
-    }
-    const p1 = b1.position;
-    return distSquared(p0, p1);
+    const o0 = o[0];
+    const sup = o0.supports[0];
+    return distSquared(p0, sup);
   }
   return d;
-}
+}*/
 
 export function now() {
   return new Date().valueOf();
