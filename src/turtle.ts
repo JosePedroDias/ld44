@@ -1,4 +1,5 @@
-import { polarMove, times, lerp } from './utils';
+import { polarMove, times, lerp, dist } from './utils';
+import { R90 } from './consts';
 
 export type TPoint = {
   x: number;
@@ -40,6 +41,18 @@ class Turtle {
     return this;
   }
 
+  dot() {
+    this.points.push(newTPoint(this.p0));
+    return this;
+  }
+
+  left(distance: number) {
+    this.turn(-R90)
+      .straight(distance, 1, true)
+      .turn(R90);
+    return this;
+  }
+
   arc(
     radius: number,
     dAngle: number,
@@ -67,6 +80,11 @@ class Turtle {
 
   log() {
     console.log(this.p0);
+    return this;
+  }
+
+  getP(f: Function) {
+    f(newTPoint(this.p0));
     return this;
   }
 }

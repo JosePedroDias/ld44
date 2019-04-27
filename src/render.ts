@@ -71,9 +71,49 @@ const roadStripsStyle = {
 function road2Lanes(body: BodyExt) {
   // @ts-ignore
   const segments: Array<any> = body.segments;
-  const p0: TPoint = segments.shift();
+  let p0: TPoint = segments.shift();
 
-  const straightL = 150;
+  function setP0(p: TPoint) {
+    p0 = p;
+  }
+
+  segments.forEach(segment => {
+    let tFill: any;
+    let tStrips: any;
+    //console.log(segment);
+    if (segment[0] === 'straight') {
+      const straightL: number = segment[1];
+      tFill = new Turtle(p0, true)
+        .left(laneL)
+        .dot()
+        .straight(straightL)
+        .turn(R90)
+        .straight(laneL2)
+        .turn(R90)
+        .straight(straightL);
+      tStrips = new Turtle(p0).straight(straightL).getP(setP0);
+    } else if (segment[0] === 'arc') {
+      const straightL: number = segment[1];
+      const angle: number = segment[2];
+      tFill = new Turtle(p0, true)
+        .left(laneL)
+        .dot()
+        .arc(straightL, angle)
+        .turn(R90)
+        .straight(laneL2)
+        .turn(R90)
+        .arc(straightL - laneL2, -angle);
+      tStrips = new Turtle(p0).arc(straightL - laneL, angle).getP(setP0);
+    }
+    if (tFill) app.polyline(tFill.points.map(vectToPair)).attr(roadFillStyle);
+    if (tStrips)
+      app.polyline(tStrips.points.map(vectToPair)).attr(roadStripsStyle);
+  });
+
+  //console.log(tFill.points);
+  //});
+
+  /* const straightL = 150;
   const tFill = new Turtle(p0)
     .straight(straightL) // 0
     .arc(straightL, R90) // 1 xxx
@@ -104,7 +144,7 @@ function road2Lanes(body: BodyExt) {
     .turn(-R90)
     .straight(straightL) // 0
     .arc(straightL - laneL, R90); // 1
-  app.polyline(tCenter.points.map(vectToPair)).attr(roadStripsStyle);
+  app.polyline(tCenter.points.map(vectToPair)).attr(roadStripsStyle); */
   // const grp = app.group();
   // grp.add(tFill);
   // grp.add(tBorder0);
