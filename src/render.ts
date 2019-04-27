@@ -1,5 +1,6 @@
 import { Composite, Engine, Vector } from 'matter-js';
 import { BodyExt } from './main';
+// @ts-ignore should fix this...
 import * as SVG from 'svg.js';
 import { R2D, R90 } from './consts';
 import { clampAngle, vectToPair } from './utils';
