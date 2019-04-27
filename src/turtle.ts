@@ -64,6 +64,11 @@ class Turtle {
 
     return this;
   }
+
+  log() {
+    console.log(this.p0);
+    return this;
+  }
 }
 
 export default Turtle;

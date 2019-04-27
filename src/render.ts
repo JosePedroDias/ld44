@@ -3,7 +3,7 @@ import { BodyExt } from './main';
 import * as SVG from 'svg.js';
 import { R2D, R90 } from './consts';
 import { clampAngle, vectToPair } from './utils';
-import Turtle from './turtle';
+import Turtle, { TPoint } from './turtle';
 
 const W = 800;
 const H = 600;
@@ -56,6 +56,62 @@ function rect(body: BodyExt) {
   return g;
 }
 
+const laneL = 20;
+const laneL2 = laneL * 2;
+
+const roadFillStyle = { fill: '#555', stroke: 'none' };
+const roadBorderStyle = { fill: 'none', stroke: '#DDD', 'stroke-width': 2 };
+const roadStripsStyle = {
+  fill: 'none',
+  stroke: 'white',
+  'stroke-width': 1.5,
+  'stroke-dasharray': '6'
+};
+
+function road2Lanes(body: BodyExt) {
+  // @ts-ignore
+  const segments: Array<any> = body.segments;
+  const p0: TPoint = segments.shift();
+
+  const straightL = 150;
+  const tFill = new Turtle(p0)
+    .straight(straightL) // 0
+    .arc(straightL, R90) // 1 xxx
+    .turn(R90)
+    .straight(laneL2)
+    .turn(R90)
+    .arc(straightL - laneL2, -R90) // 1 xxx
+    .straight(straightL) // 0
+    .turn(R90);
+  app.polyline(tFill.points.map(vectToPair)).attr(roadFillStyle);
+
+  const tBorder0 = new Turtle(p0)
+    .straight(straightL) // 0
+    .arc(straightL, R90); // 1 xxx
+  app.polyline(tBorder0.points.map(vectToPair)).attr(roadBorderStyle);
+
+  const tBorder1 = new Turtle(p0, true)
+    .turn(R90)
+    .straight(laneL2, 1)
+    .turn(-R90)
+    .straight(straightL) // 0
+    .arc(straightL - laneL2, R90); // 1 xxx
+  app.polyline(tBorder1.points.map(vectToPair)).attr(roadBorderStyle);
+
+  const tCenter = new Turtle(p0, true)
+    .turn(R90)
+    .straight(laneL, 1)
+    .turn(-R90)
+    .straight(straightL) // 0
+    .arc(straightL - laneL, R90); // 1
+  app.polyline(tCenter.points.map(vectToPair)).attr(roadStripsStyle);
+  // const grp = app.group();
+  // grp.add(tFill);
+  // grp.add(tBorder0);
+  // grp.add(tBorder1);
+  // grp.add(tCenter);
+}
+
 export function setup() {
   // @ts-ignore
   app = SVG('body').size(W, H);
@@ -88,66 +144,18 @@ export function renderFactory(engine: Engine) {
       bodies.forEach(body => {
         if (body.kind === 'circle') {
           circle(body);
-        } else {
+        } else if (body.kind === 'rect') {
           rect(body);
+        } else if (body.kind === 'road2') {
+          road2Lanes(body);
         }
       });
-
-      // TODO TEMP
-      const laneL = 20;
-      const laneL2 = laneL * 2;
-      const straightL = 150;
-      const tFill = new Turtle({ x: 0, y: 0, a: 0 })
-        .straight(straightL)
-        .arc(straightL, R90)
-        .turn(R90)
-        .straight(laneL2)
-        .turn(R90)
-        .arc(straightL - laneL2, -R90)
-        .straight(straightL)
-        .turn(R90);
-      //.straight(straightL);
-      app
-        .polyline(tFill.points.map(vectToPair))
-        .attr({ fill: '#555', stroke: 'none' });
-
-      const tBorder0 = new Turtle({ x: 0, y: 0, a: 0 })
-        .straight(straightL)
-        .arc(straightL, R90);
-      app
-        .polyline(tBorder0.points.map(vectToPair))
-        .attr({ fill: 'none', stroke: '#DDD', 'stroke-width': 2 });
-
-      const tBorder1 = new Turtle({ x: 0, y: 0, a: 0 }, true)
-        .turn(R90)
-        .straight(laneL2, 1)
-        .turn(-R90)
-        .straight(straightL)
-        .arc(straightL - laneL2, R90);
-      app
-        .polyline(tBorder1.points.map(vectToPair))
-        .attr({ fill: 'none', stroke: '#DDD', 'stroke-width': 2 });
-
-      const tCenter = new Turtle({ x: 0, y: 0, a: 0 }, true)
-        .turn(R90)
-        .straight(laneL, 1)
-        .turn(-R90)
-        .straight(straightL)
-        .arc(straightL - laneL, R90);
-      app.polyline(tCenter.points.map(vectToPair)).attr({
-        fill: 'none',
-        stroke: 'white',
-        'stroke-width': 1.5,
-        'stroke-dasharray': '6'
-      });
-      // const grp = app.group();
-      // grp.add(tFill);
-      // grp.add(tBorder0);
-      // grp.add(tBorder1);
-      // grp.add(tCenter);
     } else {
       bodies.forEach((body, i) => {
         const g = body.el;
+        if (!g) {
+          return;
+        }
         const deg = body.angle * R2D;
         g.transform({ rotation: deg }).transform(body.position);
       });

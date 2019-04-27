@@ -10,7 +10,11 @@ import {
   justChanged
 } from './keyboard';
 import { clamp, sign, lerp, raycast, accum } from './utils';
-import { CAR_CATEGORY, OBSTACLE_CATEGORY } from './matterCategories';
+import {
+  CAR_CATEGORY,
+  OBSTACLE_CATEGORY,
+  IGNORE_CATEGORY
+} from './matterCategories';
 import { MapItem, map } from './map';
 
 export interface BodyExt extends Body {
@@ -54,7 +58,9 @@ function addCar(item: MapItem) {
   }) as BodyExt;
   b2.kind = 'rect'; // rect sprite
   //b2.sprite = `assets/B.png`;
-  b2.color = item.color;
+  if (item.color) {
+    b2.color = item.color;
+  }
   b2.dims = [w, h];
   b2.frictionAir = 0.3;
   b2.friction = 0.1;
@@ -64,6 +70,7 @@ function addCar(item: MapItem) {
 
 function addObstacle(item: MapItem) {
   // @ts-ignore
+  item.radius = item.radius || 0;
   let b2: BodyExt = Bodies.circle(
     item.position.x,
     item.position.y,
@@ -78,21 +85,41 @@ function addObstacle(item: MapItem) {
     }
   );
   b2.kind = 'circle';
-  b2.color = item.color;
+  if (item.color) {
+    b2.color = item.color;
+  }
+
   b2.dims = [item.radius * 2, item.radius * 2];
   World.add(engine.world, b2);
   obstacles.push(b2);
   return b2;
 }
 
-function addRoadSegment() {}
+function addRoad(item: MapItem) {
+  // @ts-ignore
+  const b2: BodyExt = Bodies.circle(-1000, -1000, 1, {
+    isStatic: true,
+    // @ts-ignore
+    collisionFilter: {
+      category: IGNORE_CATEGORY,
+      mask: 0
+    }
+  });
+  b2.kind = 'road2';
+  // @ts-ignore
+  b2.segments = item.segments;
+  World.add(engine.world, b2);
+  return b2;
+}
 
-map.forEach((mapItem, idx) => {
-  if (mapItem.kind === 'circle') {
+map.forEach(mapItem => {
+  if (mapItem.kind === 'road2') {
+    addRoad(mapItem);
+  } else if (mapItem.kind === 'circle') {
     addObstacle(mapItem);
-  } else {
+  } else if (mapItem.kind === 'rect') {
     const b2 = addCar(mapItem);
-    if (idx === 0) {
+    if (!playerBody) {
       playerBody = b2;
       cameraTargetBody = b2;
       cameraTargetBodiesAvailable.push(b2);
