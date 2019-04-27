@@ -2,7 +2,7 @@ import { Composite, Engine, Vector } from 'matter-js';
 import { BodyExt } from './main';
 // @ts-ignore should fix this...
 import * as SVG from 'svg.js';
-import { R2D, R90 } from './consts';
+import { R2D, R90, D2R, R180 } from './consts';
 import { clampAngle, vectToPair } from './utils';
 import Turtle, { TPoint } from './turtle';
 
@@ -14,6 +14,7 @@ let CAM_Y0 = 0;
 let ZOOM = 1;
 
 let app: any;
+let wp: any;
 
 export function setZoom(z: number) {
   ZOOM = z;
@@ -60,6 +61,8 @@ function rect(body: BodyExt) {
 const laneL = 20;
 const laneL2 = laneL * 2;
 
+const waypointUses = [];
+
 const roadFillStyle = { fill: '#555', stroke: 'none' };
 const roadBorderStyle = { fill: 'none', stroke: '#DDD', 'stroke-width': 2 };
 const roadStripsStyle = {
@@ -81,6 +84,8 @@ function road2Lanes(body: BodyExt) {
   segments.forEach(segment => {
     let tFill: any;
     let tStrips: any;
+    let tmp: any;
+    let wps: Array<any> = [];
     //console.log(segment);
     if (segment[0] === 'straight') {
       const straightL: number = segment[1];
@@ -92,6 +97,20 @@ function road2Lanes(body: BodyExt) {
         .straight(laneL2)
         .turn(R90)
         .straight(straightL);
+
+      tmp = new Turtle(p0, true)
+        .left(-laneL / 2)
+        .dot()
+        .straight(straightL, Math.ceil(straightL / 20));
+      wps = wps.concat(tmp.points);
+
+      tmp = new Turtle(p0, true)
+        .left(laneL / 2)
+        .turn(R180)
+        .dot()
+        .straight(-straightL, Math.ceil(straightL / 20));
+      wps = wps.concat(tmp.points);
+
       tStrips = new Turtle(p0).straight(straightL).getP(setP0);
     } else if (segment[0] === 'arc') {
       const straightL: number = segment[1];
@@ -104,11 +123,39 @@ function road2Lanes(body: BodyExt) {
         .straight(laneL2)
         .turn(R90)
         .arc(straightL - laneL2, -angle);
+
+      let c = straightL - laneL / 2;
+      tmp = new Turtle(p0, true)
+        .left(laneL / 2)
+        .turn(R180)
+        .dot()
+        .arc(-c, angle, Math.ceil((angle * c) / 20));
+      wps = wps.concat(tmp.points);
+
+      c = straightL - laneL * 1.5;
+      tmp = new Turtle(p0, true)
+        .left(-laneL / 2)
+        .dot()
+        .arc(c, angle, Math.ceil((angle * c) / 20));
+      wps = wps.concat(tmp.points);
+
       tStrips = new Turtle(p0).arc(straightL - laneL, angle).getP(setP0);
     }
-    if (tFill) app.polyline(tFill.points.map(vectToPair)).attr(roadFillStyle);
-    if (tStrips)
+    if (tFill) {
+      app.polygon(tFill.points.map(vectToPair)).attr(roadFillStyle);
+    }
+    if (tStrips) {
       app.polyline(tStrips.points.map(vectToPair)).attr(roadStripsStyle);
+    }
+    if (wps.length) {
+      //console.log(wps);
+      wps.forEach((p: any) =>
+        app
+          .use(wp)
+          .move(p.x, p.y)
+          .rotate(p.a * R2D)
+      );
+    }
   });
 
   //console.log(tFill.points);
@@ -156,6 +203,11 @@ function road2Lanes(body: BodyExt) {
 export function setup() {
   // @ts-ignore
   app = SVG('body').size(W, H);
+
+  wp = app
+    .defs()
+    .polygon([4, 0, -3, -2, -3, 2])
+    .fill('#F0F');
 }
 
 let running = true;
@@ -166,18 +218,30 @@ export function stopEngine() {
 
 export function renderFactory(engine: Engine) {
   let t0 = 0;
+  let frame = 0;
 
   function render(t_: number) {
     const t = t_ / 1000;
+    const dt = t - t0;
+    const fps = 1 / dt;
+    //console.log('FPS ' + fps.toFixed(1));
     t0 = t;
+
+    ++frame;
+
     // console.log(t.toFixed(2));
+
+    window.requestAnimationFrame(render);
+
+    /* if (frame % 2 !== 0) {
+      return console.log('skipped', frame, frame % 2);
+    } */
+
+    Engine.update(engine, 1000 / fps);
 
     if (!running) {
       return;
     }
-
-    window.requestAnimationFrame(render);
-    Engine.update(engine, 1000 / 60);
 
     const bodies = Composite.allBodies(engine.world) as Array<BodyExt>;
 

@@ -30,10 +30,16 @@ Use the arrow keys to move it.
     [x] integrate collision detection / basic physics (matter.js)
     [x] render using SVG (svg.js)
     [x] create road segments
-    [ ] generate waypoints from road segments
+    [x] generate waypoints from road segments
     [ ] make bots drive based on waypoints
     [ ] make bots have goal destinations (to turn and whatnot)
     [ ] create traffic lights
     [ ] different bot behaviour, maybe 
     [ ] procgen cars, maybe
     [ ] script some scenarios
+
+
+## twitter thread
+
+You can follow the development here on GitHub or in my ldjam thread on twitter:  
+<https://twitter.com/jose_pedro_dias/status/1121963823001427968>

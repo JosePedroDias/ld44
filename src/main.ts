@@ -131,7 +131,6 @@ map.forEach(mapItem => {
 
 renderFactory(engine);
 
-//setZoom(2.5);
 setPosition({ x: -400, y: -200 });
 
 Events.on(engine, 'afterUpdate', (ev: any) => {
@@ -198,9 +197,7 @@ Events.on(engine, 'beforeUpdate', (ev: any) => {
 
   // @ts-ignore
   setPosition(cameraTargetBody.position);
-  setZoom(
-    lerp(clamp(0.5 / cameraTargetBody.speed, 0.75, 1.33), getZoom(), 0.03)
-  );
+  setZoom(lerp(clamp(0.5 / cameraTargetBody.speed, 0.75, 2), getZoom(), 0.03));
 
   //console.log(isDown);
 
