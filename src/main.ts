@@ -9,13 +9,14 @@ import {
   hookKeys,
   justChanged
 } from './keyboard';
-import { clamp, sign, lerp, raycast, accum } from './utils';
+import { clamp, sign, lerp, raycast, accum, angleBetweenAngles } from './utils';
 import {
   CAR_CATEGORY,
   OBSTACLE_CATEGORY,
   IGNORE_CATEGORY
 } from './matterCategories';
 import { MapItem, map } from './map';
+import { getNearestWaypoint } from './waypoints';
 
 export interface BodyExt extends Body {
   el: any;
@@ -208,10 +209,18 @@ Events.on(engine, 'beforeUpdate', (ev: any) => {
     );
   }
 
-  const fwd = accum(fwdAccum, Math.random() * 1.5 - 0.5, 5); // [-0.5, 1]
-  const side = accum(sideAccum, Math.random() * 2 - 1, 10); // [-1, 1]
+  //const fwd = accum(fwdAccum, Math.random() * 1.5 - 0.5, 5); // [-0.5, 1]
+  //const side = accum(sideAccum, Math.random() * 2 - 1, 10); // [-1, 1]
 
   bots.forEach(bot => {
+    const wp = getNearestWaypoint(bot.position, bot.angle);
+
+    const a = angleBetweenAngles(wp.a, bot.angle);
+    const shouldTurn = Math.abs(a) > 0.7;
+    //console.log(a);
+
+    const fwd = 0.25;
+    const side = shouldTurn ? sign(a) * 0.3 : 0;
     driveCarLow(bot, fwd, side);
   });
 });

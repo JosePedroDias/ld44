@@ -83,15 +83,27 @@ export function linearize(n: number, a: number, b: number): number {
   return clamp(r, 0, 1);
 }
 
-export function sign(n: number) {
+export function sign(n: number): number {
   return n > 0 ? 1 : n < 0 ? -1 : 0;
 }
 
-export function vecToAngle(v: Vector) {
+export function vecToAngle(v: Vector): number {
   return Math.atan2(v.y, v.x);
 }
 
-export function normalizeAngle(a: number) {
+export function angleBetweenVectors(v1: Vector, v2: Vector): number {
+  return Math.atan2(v2.y - v1.y, v2.x - v1.x);
+}
+
+export function angleToVector(a: number): Vector {
+  return { x: Math.cos(a), y: Math.sin(a) };
+}
+
+export function angleBetweenAngles(a1: number, a2: number): number {
+  return angleBetweenVectors(angleToVector(a1), angleToVector(a2));
+}
+
+export function normalizeAngle(a: number): number {
   while (a < 0) {
     a += R360;
   }
@@ -155,11 +167,11 @@ export function rayDist(
   return d;
 }*/
 
-export function now() {
+export function now(): number {
   return new Date().valueOf();
 }
 
-export function randomInt(n: number) {
+export function randomInt(n: number): number {
   return ~~(Math.random() * n);
 }
 
@@ -167,7 +179,7 @@ export function randomFromArray(arr: Array<any>): any {
   return arr[randomInt(arr.length)];
 }
 
-export function avg(arr: Array<number>) {
+export function avg(arr: Array<number>): number {
   let n = 0;
   const len = arr.length;
   for (let i = 0; i < len; ++i) {

@@ -16,18 +16,19 @@ let ZOOM = 1;
 let app: any;
 let wp: any;
 
-let wps: Array<any> = [];
+let wps: Array<TPoint> = [];
+
+//////
+
+export function getWaypoints(): Array<TPoint> {
+  return wps;
+}
 
 export function setZoom(z: number) {
   ZOOM = z;
 }
 export function getZoom(): number {
   return ZOOM;
-}
-
-export function setRotation(deg: number) {}
-export function getRotation(): number {
-  return 0;
 }
 
 export function setPosition(point: Vector) {
@@ -43,6 +44,8 @@ export function setPosition(point: Vector) {
 export function getPosition(): Vector {
   return { x: CAM_X0, y: CAM_Y0 };
 }
+
+//////
 
 function circle(body: BodyExt) {
   const r = body.dims[0]; // / 2 ;// @TODO WEIRD
@@ -65,10 +68,7 @@ function rect(body: BodyExt) {
 const laneL = 20;
 const laneL2 = laneL * 2;
 
-const waypointUses = [];
-
 const roadFillStyle = { fill: '#555', stroke: 'none' };
-const roadBorderStyle = { fill: 'none', stroke: '#DDD', 'stroke-width': 2 };
 const roadStripsStyle = {
   fill: 'none',
   stroke: 'white',
