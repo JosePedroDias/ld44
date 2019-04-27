@@ -1,10 +1,3 @@
-@font-face {
-  /*font-family: 'Comfortaa';*/
-  font-style: normal;
-  font-weight: 400;
-  /*src: local('Comfortaa'), url(assets/fonts/Comfortaa.ttf) format('truetype');*/
-}
-
 html,
 body {
   overflow: hidden;
@@ -32,5 +25,6 @@ svg {
   top: 50%;
   margin-left: -400px;
   margin-top: -300px;
+  pointer-events: none;
 }
 

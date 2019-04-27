@@ -6,8 +6,10 @@ export type Kind = 'circle' | 'rect' | 'road' | 'road2';
 export type MapItem = {
   position: Vector;
   kind: Kind;
+  angle?: number;
   radius?: number;
   color?: string;
+  isPlayer?: boolean;
   segments?: any;
 };
 
@@ -17,6 +19,8 @@ const WHITE = '#FFF';
 const RED = '#F00';
 const GREEN = '#0F0';
 const BLUE = '#00F';
+
+const laneL = 20;
 
 export const map: Map = [
   {
@@ -35,9 +39,19 @@ export const map: Map = [
       ['straight', 80]
     ]
   },
-  { position: { x: 0, y: 0 }, color: WHITE, kind: 'rect' }
-  //{ position: { x: 50, y: 0 }, color: BLUE, kind: 'rect' },
-  //{ position: { x: -50, y: 0 },color: BLUE, kind: 'rect' },
-  // { position: { x: 160, y: 120 }, radius: 60, color: '#2A2', kind: 'circle' },
-  //{ position: { x: -100, y: 120 }, radius: 20, color: RED, kind: 'circle' }
+  {
+    position: { x: 0, y: 0 + laneL / 2 },
+    angle: R90,
+    color: WHITE,
+    kind: 'rect',
+    isPlayer: true
+  },
+  {
+    position: { x: 0, y: 0 - laneL / 2 },
+    angle: -R90,
+    color: BLUE,
+    kind: 'rect'
+  },
+  { position: { x: 100, y: 120 }, radius: 60, color: GREEN, kind: 'circle' },
+  { position: { x: -80, y: 120 }, radius: 20, color: RED, kind: 'circle' }
 ];

@@ -47,17 +47,17 @@ const sideAccum: Array<number> = [];
 function addCar(item: MapItem) {
   const w = 14;
   const h = 22;
+  const angle = item.angle || 0;
   // @ts-ignore
   let b2: BodyExt = Bodies.rectangle(item.position.x, item.position.y, w, h, {
     isStatic: false,
-    angle: 0,
+    angle,
     collisionFilter: {
       category: CAR_CATEGORY,
       mask: CAR_CATEGORY | OBSTACLE_CATEGORY
     }
   }) as BodyExt;
-  b2.kind = 'rect'; // rect sprite
-  //b2.sprite = `assets/B.png`;
+  b2.kind = 'rect';
   if (item.color) {
     b2.color = item.color;
   }
@@ -119,7 +119,7 @@ map.forEach(mapItem => {
     addObstacle(mapItem);
   } else if (mapItem.kind === 'rect') {
     const b2 = addCar(mapItem);
-    if (!playerBody) {
+    if (!playerBody && mapItem.isPlayer) {
       playerBody = b2;
       cameraTargetBody = b2;
       cameraTargetBodiesAvailable.push(b2);
@@ -131,14 +131,14 @@ map.forEach(mapItem => {
 
 renderFactory(engine);
 
-setPosition({ x: -400, y: -200 });
+// @TODO center of bouding box?
+setZoom(1.1);
+setPosition({ x: 0, y: 250 });
 
 Events.on(engine, 'afterUpdate', (ev: any) => {
-  const d = raycast(playerBody, obstacles, -Math.PI / 2, 0, 256, 4);
-
+  // const d = raycast(playerBody, obstacles, -Math.PI / 2, 0, 256, 4);
   //const dd = dist(d[0], d[1]);
   //console.log(dd.toFixed(0));
-
   // @ts-ignore
   //window.addLine = [d[0], d[1], 0xff00ff, 2];
 });
@@ -186,35 +186,33 @@ function driveCarLow(carBody: Body, fwd: number, side: number) {
 Events.on(engine, 'beforeUpdate', (ev: any) => {
   // collisionStart collisionEnd beforeUpdate beforeTick
 
-  //console.log(justChanged);
-
-  Object.keys(justChanged).forEach(k => {
-    // @ts-ignore
-    justChanged[k] = false;
-  });
-
-  // console.log(`${oldPos.x.toFixed(0)}, ${oldPos.y.toFixed(0)}`);
-
-  // @ts-ignore
-  setPosition(cameraTargetBody.position);
-  setZoom(lerp(clamp(0.5 / cameraTargetBody.speed, 0.75, 2), getZoom(), 0.03));
-
-  //console.log(isDown);
-
   // manipulate car according to keys being pressed
-  driveCar(
-    playerBody,
-    isDown[KC_UP],
-    isDown[KC_DOWN],
-    isDown[KC_LEFT],
-    isDown[KC_RIGHT]
-  );
+  if (playerBody) {
+    Object.keys(justChanged).forEach(k => {
+      // @ts-ignore
+      justChanged[k] = false;
+    });
+
+    // @ts-ignore
+    setPosition(cameraTargetBody.position);
+    setZoom(
+      lerp(clamp(0.5 / cameraTargetBody.speed, 0.75, 2), getZoom(), 0.03)
+    );
+
+    driveCar(
+      playerBody,
+      isDown[KC_UP],
+      isDown[KC_DOWN],
+      isDown[KC_LEFT],
+      isDown[KC_RIGHT]
+    );
+  }
 
   const fwd = accum(fwdAccum, Math.random() * 1.5 - 0.5, 5); // [-0.5, 1]
   const side = accum(sideAccum, Math.random() * 2 - 1, 10); // [-1, 1]
 
   bots.forEach(bot => {
-    //driveCarLow(bot, fwd, side);
+    driveCarLow(bot, fwd, side);
   });
 });
 

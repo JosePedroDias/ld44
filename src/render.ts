@@ -2,8 +2,8 @@ import { Composite, Engine, Vector } from 'matter-js';
 import { BodyExt } from './main';
 // @ts-ignore should fix this...
 import * as SVG from 'svg.js';
-import { R2D, R90, D2R, R180 } from './consts';
-import { clampAngle, vectToPair } from './utils';
+import { R2D, R90, R180, DEBUG } from './consts';
+import { vectToPair } from './utils';
 import Turtle, { TPoint } from './turtle';
 
 const W = 800;
@@ -15,6 +15,8 @@ let ZOOM = 1;
 
 let app: any;
 let wp: any;
+
+let wps: Array<any> = [];
 
 export function setZoom(z: number) {
   ZOOM = z;
@@ -44,13 +46,15 @@ export function getPosition(): Vector {
 
 function circle(body: BodyExt) {
   const r = body.dims[0]; // / 2 ;// @TODO WEIRD
-  const g = app.circle(r).attr({ cx: 0, cy: 0, fill: body.color });
+  const g = app
+    .circle(r)
+    .attr({ cx: 0, cy: 0, fill: body.color, 'data-name': 'circle' });
   body.el = g;
   return g;
 }
 
 function rect(body: BodyExt) {
-  const g = app.group();
+  const g = app.group().attr({ 'data-name': 'rect' });
   const rect = app.rect(body.dims[0], body.dims[1]).attr({ fill: body.color });
   rect.move(-body.dims[0] / 2, -body.dims[1] / 2);
   g.add(rect);
@@ -81,11 +85,13 @@ function road2Lanes(body: BodyExt) {
     p0 = p;
   }
 
+  const roadGrp = app.group().attr({ 'data-name': 'road' });
+  const wpsGrp = app.group().attr({ 'data-name': 'waypoints' });
+
   segments.forEach(segment => {
     let tFill: any;
     let tStrips: any;
     let tmp: any;
-    let wps: Array<any> = [];
     //console.log(segment);
     if (segment[0] === 'straight') {
       const straightL: number = segment[1];
@@ -142,62 +148,20 @@ function road2Lanes(body: BodyExt) {
       tStrips = new Turtle(p0).arc(straightL - laneL, angle).getP(setP0);
     }
     if (tFill) {
-      app.polygon(tFill.points.map(vectToPair)).attr(roadFillStyle);
+      roadGrp.polygon(tFill.points.map(vectToPair)).attr(roadFillStyle);
     }
     if (tStrips) {
-      app.polyline(tStrips.points.map(vectToPair)).attr(roadStripsStyle);
+      roadGrp.polyline(tStrips.points.map(vectToPair)).attr(roadStripsStyle);
     }
-    if (wps.length) {
-      //console.log(wps);
-      wps.forEach((p: any) =>
-        app
+    if (DEBUG) {
+      wps.forEach((p: any) => {
+        wpsGrp
           .use(wp)
           .move(p.x, p.y)
-          .rotate(p.a * R2D)
-      );
+          .rotate(p.a * R2D);
+      });
     }
   });
-
-  //console.log(tFill.points);
-  //});
-
-  /* const straightL = 150;
-  const tFill = new Turtle(p0)
-    .straight(straightL) // 0
-    .arc(straightL, R90) // 1 xxx
-    .turn(R90)
-    .straight(laneL2)
-    .turn(R90)
-    .arc(straightL - laneL2, -R90) // 1 xxx
-    .straight(straightL) // 0
-    .turn(R90);
-  app.polyline(tFill.points.map(vectToPair)).attr(roadFillStyle);
-
-  const tBorder0 = new Turtle(p0)
-    .straight(straightL) // 0
-    .arc(straightL, R90); // 1 xxx
-  app.polyline(tBorder0.points.map(vectToPair)).attr(roadBorderStyle);
-
-  const tBorder1 = new Turtle(p0, true)
-    .turn(R90)
-    .straight(laneL2, 1)
-    .turn(-R90)
-    .straight(straightL) // 0
-    .arc(straightL - laneL2, R90); // 1 xxx
-  app.polyline(tBorder1.points.map(vectToPair)).attr(roadBorderStyle);
-
-  const tCenter = new Turtle(p0, true)
-    .turn(R90)
-    .straight(laneL, 1)
-    .turn(-R90)
-    .straight(straightL) // 0
-    .arc(straightL - laneL, R90); // 1
-  app.polyline(tCenter.points.map(vectToPair)).attr(roadStripsStyle); */
-  // const grp = app.group();
-  // grp.add(tFill);
-  // grp.add(tBorder0);
-  // grp.add(tBorder1);
-  // grp.add(tCenter);
 }
 
 export function setup() {
