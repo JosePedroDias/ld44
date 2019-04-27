@@ -14,16 +14,16 @@ class Turtle {
   p0: TPoint;
   points: Array<TPoint>;
 
-  constructor(p0: TPoint) {
+  constructor(p0: TPoint, skipDraw: boolean = false) {
     this.p0 = newTPoint(p0);
     this.points = [];
-  }
 
-  straight(distance: number, steps: number = 1, skipDraw: boolean = false) {
     if (!skipDraw) {
       this.points.push(newTPoint(this.p0));
     }
+  }
 
+  straight(distance: number, steps: number = 1, skipDraw: boolean = false) {
     for (let i = 0; i < steps; ++i) {
       const v = polarMove(this.p0, distance / steps, this.p0.a);
       this.p0 = { x: v.x, y: v.y, a: this.p0.a };
@@ -32,30 +32,37 @@ class Turtle {
         this.points.push(newTPoint(this.p0));
       }
     }
+    return this;
+  }
+
+  turn(dAngle: number) {
+    this.p0 = { x: this.p0.x, y: this.p0.y, a: this.p0.a + dAngle };
+    return this;
   }
 
   arc(
-    distance: number,
+    radius: number,
     dAngle: number,
-    steps: number = 4,
+    steps: number = 16,
     skipDraw: boolean = false
   ) {
-    const initialP = newTPoint(this.p0);
+    const sign = dAngle < 0 ? -1 : 1;
+    const dAngleAbs = Math.abs(dAngle);
+    const dda = dAngleAbs / (steps - 1);
 
-    if (!skipDraw) {
-      this.points.push(newTPoint(this.p0));
-    }
+    times(steps).forEach(i => {
+      const t = i / steps;
+      const r = lerp(radius, radius, t);
+      const l = (dAngleAbs * r) / steps;
 
-    for (let i = 0; i < steps; ++i) {
-      const rat = (i + 1) / steps;
-      const a1 = lerp(initialP.a, initialP.a + dAngle, rat);
-      const v = polarMove(this.p0, distance * rat, a1);
-      this.p0 = { x: v.x, y: v.y, a: a1 };
+      this.straight(l, 1, skipDraw);
 
-      if (!skipDraw) {
-        this.points.push(newTPoint(this.p0));
+      if (i < steps - 1) {
+        this.turn(sign * dda);
       }
-    }
+    });
+
+    return this;
   }
 }
 

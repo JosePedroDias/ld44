@@ -18,8 +18,8 @@ const BLUE = '#00F';
 
 export const map: Map = [
   { position: { x: 0, y: 0 }, radius: 0, color: WHITE, kind: 'rect' },
-  { position: { x: 50, y: 0 }, radius: 0, color: BLUE, kind: 'rect' },
-  { position: { x: -50, y: 0 }, radius: 0, color: BLUE, kind: 'rect' },
-  { position: { x: 100, y: 100 }, radius: 40, color: RED, kind: 'circle' },
+  //{ position: { x: 50, y: 0 }, radius: 0, color: BLUE, kind: 'rect' },
+  //{ position: { x: -50, y: 0 }, radius: 0, color: BLUE, kind: 'rect' },
+  { position: { x: 160, y: 120 }, radius: 60, color: '#2A2', kind: 'circle' },
   { position: { x: -100, y: 120 }, radius: 20, color: RED, kind: 'circle' }
 ];

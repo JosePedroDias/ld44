@@ -1,8 +1,9 @@
 import { Composite, Engine, Vector } from 'matter-js';
 import { BodyExt } from './main';
 import * as SVG from 'svg.js';
-import { R2D } from './consts';
-import { clampAngle } from './utils';
+import { R2D, R90 } from './consts';
+import { clampAngle, vectToPair } from './utils';
+import Turtle from './turtle';
 
 const W = 800;
 const H = 600;
@@ -28,22 +29,19 @@ export function getRotation(): number {
 export function setPosition(point: Vector) {
   CAM_X0 = point.x;
   CAM_Y0 = point.y;
-  app.viewbox(-W / 2, -H / 2, W / ZOOM, H / ZOOM);
+  app.viewbox(
+    point.x - W / ZOOM / 2,
+    point.y - H / ZOOM / 2,
+    W / ZOOM,
+    H / ZOOM
+  );
 }
 export function getPosition(): Vector {
   return { x: CAM_X0, y: CAM_Y0 };
 }
 
 function circle(body: BodyExt) {
-  /* const g = app.group();
-  const r = body.dims[0] / 2;
-  const circle = app.circle(r).attr({ fill: body.color });
-  //circle.move(-r, -r);
-  //circle.transform({ x: -r, y: -r });
-  g.add(circle);
-  body.el = g;
-  return g; */
-  const r = body.dims[0]; // / 2;
+  const r = body.dims[0]; // / 2 ;// @TODO WEIRD
   const g = app.circle(r).attr({ cx: 0, cy: 0, fill: body.color });
   body.el = g;
   return g;
@@ -94,6 +92,59 @@ export function renderFactory(engine: Engine) {
           rect(body);
         }
       });
+
+      // TODO TEMP
+      const laneL = 20;
+      const laneL2 = laneL * 2;
+      const straightL = 150;
+      const tFill = new Turtle({ x: 0, y: 0, a: 0 })
+        .straight(straightL)
+        .arc(straightL, R90)
+        .turn(R90)
+        .straight(laneL2)
+        .turn(R90)
+        .arc(straightL - laneL2, -R90)
+        .straight(straightL)
+        .turn(R90);
+      //.straight(straightL);
+      app
+        .polyline(tFill.points.map(vectToPair))
+        .attr({ fill: '#555', stroke: 'none' });
+
+      const tBorder0 = new Turtle({ x: 0, y: 0, a: 0 })
+        .straight(straightL)
+        .arc(straightL, R90);
+      app
+        .polyline(tBorder0.points.map(vectToPair))
+        .attr({ fill: 'none', stroke: '#DDD', 'stroke-width': 2 });
+
+      const tBorder1 = new Turtle({ x: 0, y: 0, a: 0 }, true)
+        .turn(R90)
+        .straight(laneL2, 1)
+        .turn(-R90)
+        .straight(straightL)
+        .arc(straightL - laneL2, R90);
+      app
+        .polyline(tBorder1.points.map(vectToPair))
+        .attr({ fill: 'none', stroke: '#DDD', 'stroke-width': 2 });
+
+      const tCenter = new Turtle({ x: 0, y: 0, a: 0 }, true)
+        .turn(R90)
+        .straight(laneL, 1)
+        .turn(-R90)
+        .straight(straightL)
+        .arc(straightL - laneL, R90);
+      app.polyline(tCenter.points.map(vectToPair)).attr({
+        fill: 'none',
+        stroke: 'white',
+        'stroke-width': 1.5,
+        'stroke-dasharray': '6'
+      });
+      // const grp = app.group();
+      // grp.add(tFill);
+      // grp.add(tBorder0);
+      // grp.add(tBorder1);
+      // grp.add(tCenter);
     } else {
       bodies.forEach((body, i) => {
         const g = body.el;

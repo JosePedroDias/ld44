@@ -1,5 +1,5 @@
 import { Engine, World, Bodies, Events, Body } from 'matter-js';
-import { setup, renderFactory, setZoom, setPosition } from './render';
+import { setup, renderFactory, setZoom, setPosition, getZoom } from './render';
 import {
   KC_UP,
   KC_DOWN,
@@ -171,7 +171,9 @@ Events.on(engine, 'beforeUpdate', (ev: any) => {
 
   // @ts-ignore
   setPosition(cameraTargetBody.position);
-  // setZoom( lerp(clamp(0.5 / cameraTargetBody.speed, 0.75, 1.33), getZoom(), 0.03) );
+  setZoom(
+    lerp(clamp(0.5 / cameraTargetBody.speed, 0.75, 1.33), getZoom(), 0.03)
+  );
 
   //console.log(isDown);
 
@@ -188,7 +190,7 @@ Events.on(engine, 'beforeUpdate', (ev: any) => {
   const side = accum(sideAccum, Math.random() * 2 - 1, 10); // [-1, 1]
 
   bots.forEach(bot => {
-    driveCarLow(bot, fwd, side);
+    //driveCarLow(bot, fwd, side);
   });
 });
 

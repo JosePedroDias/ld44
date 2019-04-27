@@ -192,3 +192,7 @@ export function accum(
 
   return v / maxLength;
 }
+
+export function vectToPair(p: Vector): Array<number> {
+  return [p.x, p.y];
+}
