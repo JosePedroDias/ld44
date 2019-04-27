@@ -1,7 +1,5 @@
 import { Engine, World, Bodies, Events, Body } from 'matter-js';
-import { setup, renderFactory, setZoom, setPosition } from './pixiRender';
-import { polyBody } from './polyBody';
-import { Point } from 'pixi.js';
+import { setup, renderFactory, setZoom, setPosition } from './render';
 import {
   KC_UP,
   KC_DOWN,
@@ -16,8 +14,9 @@ import { CAR_CATEGORY, OBSTACLE_CATEGORY } from './matterCategories';
 import { MapItem, map } from './map';
 
 export interface BodyExt extends Body {
+  el: any;
   dims: Array<number>;
-  color: number;
+  color: string;
   sprite: string;
   kind: string;
   scale: number;
@@ -57,13 +56,9 @@ function addCar(item: MapItem) {
   //b2.sprite = `assets/B.png`;
   b2.color = item.color;
   b2.dims = [w, h];
-  b2.scale = 1;
-
   b2.frictionAir = 0.3;
   b2.friction = 0.1;
-
   World.add(engine.world, b2);
-
   return b2;
 }
 
@@ -85,10 +80,12 @@ function addObstacle(item: MapItem) {
   b2.kind = 'circle';
   b2.color = item.color;
   b2.dims = [item.radius * 2, item.radius * 2];
-  b2.scale = 1;
   World.add(engine.world, b2);
   obstacles.push(b2);
+  return b2;
 }
+
+function addRoadSegment() {}
 
 map.forEach((mapItem, idx) => {
   if (mapItem.kind === 'circle') {
@@ -108,7 +105,7 @@ map.forEach((mapItem, idx) => {
 renderFactory(engine);
 
 //setZoom(2.5);
-setPosition(new Point(-400, -200));
+setPosition({ x: -400, y: -200 });
 
 Events.on(engine, 'afterUpdate', (ev: any) => {
   const d = raycast(playerBody, obstacles, -Math.PI / 2, 0, 256, 4);

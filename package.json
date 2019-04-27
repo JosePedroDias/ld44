@@ -5,12 +5,11 @@
   "main": "index.js",
   "dependencies": {
     "@types/matter-js": "^0.10.2",
-    "@types/pixi.js": "^4.8.7",
     "cross-env": "^5.2.0",
     "howler": "^2.1.2",
     "matter-js": "^0.14.2",
-    "pixi.js": "^4.8.7",
     "poly-decomp": "^0.3.0",
+    "svg.js": "^2.7.1",
     "tslint": "^5.16.0"
   },
   "devDependencies": {

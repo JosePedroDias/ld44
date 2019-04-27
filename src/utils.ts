@@ -1,5 +1,4 @@
 import { Vector, Body, Query } from 'matter-js';
-import { D2R } from './consts';
 
 const R360 = Math.PI * 2;
 
@@ -37,6 +36,14 @@ export function polarMove(pos: Vector, r: number, angle: number): Vector {
   };
 }
 
+export function times(n: number): Array<number> {
+  const arr: Array<number> = [];
+  for (let i = 0; i < n; ++i) {
+    arr.push(i);
+  }
+  return arr;
+}
+
 export function lerp(a: number, b: number, i: number) {
   return i * a + (1 - i) * b;
 }
@@ -47,6 +54,20 @@ export function lerp2(arrA: number[], arrB: number[], i: number) {
 
 export function clamp(n: number, min: number, max: number): number {
   return n < min ? min : n > max ? max : n;
+}
+
+export function clampAngle(n: number, min: number, max: number): number {
+  const delta = max - min;
+  if (n < min) {
+    while (n < min) {
+      n += delta;
+    }
+  } else if (n > max) {
+    while (n > max) {
+      n -= delta;
+    }
+  }
+  return n;
 }
 
 export function linearize(n: number, a: number, b: number): number {
